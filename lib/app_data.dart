@@ -9,8 +9,8 @@ import 'utils_websockets.dart';
 class AppData extends ChangeNotifier {
   // Atributs per gestionar la connexió
   final WebSocketsHandler _wsHandler = WebSocketsHandler();
-  final String _wsServer = "localhost";
-  final int _wsPort = 8888;
+  final String _wsServer = "bandera2.ieti.site";
+  final int _wsPort = 443;
   bool isConnected = false;
   int _reconnectAttempts = 0;
   final int _maxReconnectAttempts = 5;
@@ -170,9 +170,9 @@ class AppData extends ChangeNotifier {
     // Intentar decodificar el JSON
     gameData = jsonDecode(jsonString);
 
-    if (kDebugMode) {
-      print("Datos JSON decodificados correctamente: $gameData");
-    }
+    // if (kDebugMode) {
+    //   print("Datos JSON decodificados correctamente: $gameData");
+    // }
 
     final Set<String> imageFiles = {};
     for (var level in gameData['levels']) {

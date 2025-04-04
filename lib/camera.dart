@@ -1,5 +1,5 @@
 class Camera {
-  double x = 500;
-  double y = 500;
+  double x = 520;
+  double y = 260;
   double focal = 1500; // Amplada visible del món
 }

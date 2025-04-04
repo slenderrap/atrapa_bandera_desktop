@@ -30,11 +30,11 @@ class CanvasPainter extends CustomPainter {
           orElse: () => null,
         );
         
-        // Update camera position based on player data
-        if (appData.playerData != null) {
-          appData.camera.x = appData.playerData["x"].toDouble();
-          appData.camera.y = appData.playerData["y"].toDouble();
-        }
+        // // Update camera position based on player data
+        // if (appData.playerData != null) {
+        //   appData.camera.x = appData.playerData["x"].toDouble();
+        //   appData.camera.y = appData.playerData["y"].toDouble();
+        // }
         
         // Draw the level
         if (level != null) {
