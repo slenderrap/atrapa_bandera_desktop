@@ -27,8 +27,10 @@ class WebSocketsHandler {
     connectionStatus = ConnectionStatus.connecting;
 
     try {
+      // Establecer conexión con el servidor
       _socketClient = WebSocketChannel.connect(Uri.parse("wss://$ip:$port"));
 
+      // Una vez conectado, escuchamos mensajes
       _socketClient!.stream.listen(
         (message) {
           connectionStatus = ConnectionStatus.connected;
@@ -44,6 +46,11 @@ class WebSocketsHandler {
           onDone?.call();
         },
       );
+
+      // // Enviar el mensaje con el tipo de cliente después de conectar
+      // // Asegurarse de que el socket está conectado antes de enviar el mensaje
+      // sendMessage(json.encode({"type": "connection", "value": "flutter"}));
+
     } catch (e) {
       connectionStatus = ConnectionStatus.disconnected;
       onError?.call(e);

@@ -48,7 +48,10 @@ class CanvasPainter extends CustomPainter {
       // Draw players
       if (gameState["players"] != null) {
         for (var player in gameState["players"]) {
-          drawPlayer(canvas, painterSize, player);
+          if(player["id"][0] == "C"){
+            print("PLAYER ID: " + player["id"][0]);
+            drawPlayer(canvas, painterSize, player);
+          }
         }
       }
 

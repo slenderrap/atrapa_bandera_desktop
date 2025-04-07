@@ -14,7 +14,7 @@ class Layout extends StatefulWidget {
 }
 
 class _LayoutState extends State<Layout> {
-  final Set<String> _pressedKeys = {};
+  // final Set<String> _pressedKeys = {};
 
   @override
   void initState() {
@@ -25,42 +25,42 @@ class _LayoutState extends State<Layout> {
     });
   }
 
-  // Tractar què passa quan el jugador apreta una tecla
-  void _onKeyEvent(KeyEvent event, AppData appData) {
-    String key = event.logicalKey.keyLabel.toLowerCase();
+  // // Tractar què passa quan el jugador apreta una tecla
+  // void _onKeyEvent(KeyEvent event, AppData appData) {
+  //   String key = event.logicalKey.keyLabel.toLowerCase();
 
-    if (event is KeyDownEvent) {
-      if (event.logicalKey == LogicalKeyboardKey.space) {
-        appData.sendMessage(jsonEncode({"type": "jump"}));
-        return;
-      }
-      _pressedKeys.add(key);
-    } else if (event is KeyUpEvent) {
-      _pressedKeys.remove(key);
-    }
+  //   if (event is KeyDownEvent) {
+  //     if (event.logicalKey == LogicalKeyboardKey.space) {
+  //       appData.sendMessage(jsonEncode({"type": "jump"}));
+  //       return;
+  //     }
+  //     _pressedKeys.add(key);
+  //   } else if (event is KeyUpEvent) {
+  //     _pressedKeys.remove(key);
+  //   }
 
-    // Enviar la direcció escollida pel jugador al servidor
-    var direction = _getDirectionFromKeys();
-    appData.sendMessage(jsonEncode({"type": "direction", "value": direction}));
-  }
+    // // Enviar la direcció escollida pel jugador al servidor
+    // var direction = _getDirectionFromKeys();
+    // appData.sendMessage(jsonEncode({"type": "direction", "value": direction}));
+  // }
 
-  String _getDirectionFromKeys() {
-    bool up = _pressedKeys.contains("arrow up");
-    bool down = _pressedKeys.contains("arrow down");
-    bool left = _pressedKeys.contains("arrow left");
-    bool right = _pressedKeys.contains("arrow right");
+  // String _getDirectionFromKeys() {
+  //   bool up = _pressedKeys.contains("arrow up");
+  //   bool down = _pressedKeys.contains("arrow down");
+  //   bool left = _pressedKeys.contains("arrow left");
+  //   bool right = _pressedKeys.contains("arrow right");
 
-    if (up && left) return "upLeft";
-    if (up && right) return "upRight";
-    if (down && left) return "downLeft";
-    if (down && right) return "downRight";
-    if (up) return "up";
-    if (down) return "down";
-    if (left) return "left";
-    if (right) return "right";
+  //   if (up && left) return "upLeft";
+  //   if (up && right) return "upRight";
+  //   if (down && left) return "downLeft";
+  //   if (down && right) return "downRight";
+  //   if (up) return "up";
+  //   if (down) return "down";
+  //   if (left) return "left";
+  //   if (right) return "right";
 
-    return "none";
-  }
+  //   return "none";
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -72,10 +72,10 @@ class _LayoutState extends State<Layout> {
           color: CupertinoColors.systemGrey5,
           child: Focus(
             autofocus: true,
-            onKeyEvent: (node, event) {
-              _onKeyEvent(event, appData);
-              return KeyEventResult.handled;
-            },
+            // onKeyEvent: (node, event) {
+            //   _onKeyEvent(event, appData);
+            //   return KeyEventResult.handled;
+            // },
             child: CustomPaint(
               painter: CanvasPainter(appData),
               child: Container(),

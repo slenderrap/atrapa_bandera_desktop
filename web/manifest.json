@@ -1,6 +1,6 @@
 {
-    "name": "atrapa_bandera_desktop",
-    "short_name": "atrapa_bandera_desktop",
+    "name": "exemple_ws",
+    "short_name": "exemple_ws",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
