@@ -149,6 +149,10 @@ class AppData extends ChangeNotifier {
       final Uint8List bytes = data.buffer.asUint8List();
       imagesCache[assetName] = await decodeImage(bytes);
     }
+
+    print("ImagesCache: ");
+    print(imagesCache);
+
     return imagesCache[assetName]!;
   }
 

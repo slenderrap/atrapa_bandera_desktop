@@ -39,6 +39,7 @@ class CanvasPainter extends CustomPainter {
         // Draw the level
         if (level != null) {
           drawLevel(canvas, painterSize, level);
+          drawKey(canvas, painterSize);
         }
       }
 
@@ -206,6 +207,56 @@ class CanvasPainter extends CustomPainter {
       }
     }
   }
+
+
+
+  void drawKey(Canvas canvas, Size painterSize) {
+    final level = appData.gameData["levels"].firstWhere(
+      (lvl) => lvl["name"] == appData.gameState["level"],
+      orElse: () => null,
+    );
+    if (level == null) return;
+
+    final sprites = level["sprites"] as List<dynamic>;
+    final keySprite = sprites.firstWhere(
+      (sprite) => sprite["type"] == "key",
+      orElse: () => null,
+    );
+
+    if (keySprite == null) return;
+    final String spritePath = "${keySprite["imageFile"]}";
+
+    if (!appData.imagesCache.containsKey(spritePath)) return;
+    
+    final ui.Image spriteImg = appData.imagesCache[spritePath]!;
+
+    final Offset screenPos = worldToScreen(
+      keySprite["x"].toDouble(),
+      keySprite["y"].toDouble(),
+      painterSize,
+    );
+
+    final camData = _getCameraAndScale(painterSize);
+    final scale = camData['scale'];
+    final destWidth = keySprite["width"] * scale;
+    final destHeight = keySprite["height"] * scale;
+
+    canvas.drawImageRect(
+      spriteImg,
+      Rect.fromLTWH(0, 0, spriteImg.width.toDouble(), spriteImg.height.toDouble()),
+      Rect.fromLTWH(
+        screenPos.dx - destWidth / 2,
+        screenPos.dy - destHeight / 2,
+        destWidth,
+        destHeight,
+      ),
+      Paint(),
+    );
+  }
+
+
+
+
 
   void drawFlag(Canvas canvas, Size painterSize) {
     final level = appData.gameData["levels"].firstWhere(

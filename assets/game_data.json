@@ -95,7 +95,16 @@
         }
       ],
       "zones": [],
-      "sprites": []
+      "sprites": [
+        {
+          "type": "key",
+          "x": 275,
+          "y": 225,
+          "width": 16,
+          "height": 32,
+          "imageFile": "key.png"
+        }
+      ]
     }
   ]
 }

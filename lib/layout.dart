@@ -22,6 +22,7 @@ class _LayoutState extends State<Layout> {
     // Preload image assets into cache
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final appData = Provider.of<AppData>(context, listen: false);
+      await appData.getImage("key.png");
     });
   }
 
