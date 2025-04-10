@@ -19,8 +19,17 @@ class CanvasPainter extends CustomPainter {
     // Draw game state
     var gameState = appData.gameState;
     var gameData = appData.gameData;
+    var countdown = appData.countdown;
+    var gameStart = appData.gameStart;
+    var restart = appData.restart;
 
     if (gameState.isNotEmpty && gameData.isNotEmpty) {
+
+      // print("gameData");
+      // print(gameData);
+      // print("gameState");
+      // print(gameState);
+
       // Get level data
       if (gameState["level"] != null) {
         final String levelName = gameState["level"];
@@ -136,13 +145,13 @@ class CanvasPainter extends CustomPainter {
   // Convert color string to Flutter Color
   static Color _getColorFromString(String color) {
     switch (color.toLowerCase()) {
-      case "gray":
+      case "orc":
         return Colors.grey;
-      case "green":
+      case "human":
         return const ui.Color.fromARGB(255, 0, 121, 4);
-      case "blue":
+      case "slime":
         return Colors.blue;
-      case "orange":
+      case "vampire":
         return Colors.orange;
       case "red":
         return Colors.red;
@@ -332,7 +341,7 @@ class CanvasPainter extends CustomPainter {
 
     final double playerWidth = (player["width"] as num).toDouble();
     final double playerHeight = (player["width"] as num).toDouble();
-    final String color = player["color"];
+    final String color = player["race"];
     final String direction = player["direction"];
 
     // Get player position

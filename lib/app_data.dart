@@ -20,6 +20,9 @@ class AppData extends ChangeNotifier {
   Map<String, dynamic> gameData = {};     // Dades de 'game_data.json'
   Map<String, ui.Image> imagesCache = {}; // Imatges
   Map<String, dynamic> gameState = {};    // Estat rebut del servidor
+  Map<String, dynamic> countdown = {};    // Estat rebut del servidor
+  Map<String, dynamic> gameStart = {};
+  Map<String, dynamic> restart = {};
   dynamic playerData;                     // Apuntador al jugador (a gameState)
   Camera camera = Camera();
 
@@ -72,6 +75,20 @@ class AppData extends ChangeNotifier {
         }
         notifyListeners();
       }
+      if (data["type"] == "countdown"){
+        countdown = data;
+        print("Countdown en app_data:");
+        print(countdown);
+      }
+      if (data["type"] == "gameStart"){
+        gameStart = data;
+        // print(gameStart);
+      }
+      if (data["type"] == "restart"){
+        restart = data;
+        // print(restart);
+      }
+      // print(data);
     } catch (e) {
       if (kDebugMode) {
         print("Error processant missatge WebSocket: $e");
@@ -150,8 +167,8 @@ class AppData extends ChangeNotifier {
       imagesCache[assetName] = await decodeImage(bytes);
     }
 
-    print("ImagesCache: ");
-    print(imagesCache);
+    // print("ImagesCache: ");
+    // print(imagesCache);
 
     return imagesCache[assetName]!;
   }
