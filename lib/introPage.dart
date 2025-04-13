@@ -4,22 +4,56 @@ import 'package:provider/provider.dart';
 import 'layout.dart';
 import 'app_data.dart';
 
-class IntroPage extends StatelessWidget {
+class IntroPage extends StatefulWidget {
   const IntroPage({super.key});
+
+  @override
+  State<IntroPage> createState() => _IntroPageState();
+}class _IntroPageState extends State<IntroPage> {
+  bool hasNavigated = false;
+  String? restartMessage;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final appData = Provider.of<AppData>(context);
+
+    if (!hasNavigated) {
+      print(appData.restart);
+      if (appData.gameStart.isNotEmpty) {
+        hasNavigated = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const Layout()),
+          );
+        });
+      } else if (appData.restart.isNotEmpty && appData.countdown == 0 && appData.gameStart.isEmpty) {
+        setState(() {
+          restartMessage = "No hay suficientes jugadores para empezar la partida!";
+        });
+        print(appData.restart);
+        appData.restart = {};
+      } else if (appData.countdown > 0){
+        setState(() {
+          restartMessage = "";
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Fondo borroso con imagen
+          // Fondo
           Positioned.fill(
             child: Image.asset(
-              'assets/mainMenuImage.png', // Asegúrate de agregar esta imagen en tu carpeta assets
+              'assets/mainMenuImage.png',
               fit: BoxFit.cover,
             ),
           ),
-          // Filtro borroso y oscuro
           Positioned.fill(
             child: Container(
               color: Colors.black.withOpacity(0.5),
@@ -50,14 +84,12 @@ class IntroPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 30),
-                // Aquí usamos Consumer para escuchar los cambios en AppData
                 Consumer<AppData>(
                   builder: (context, appData, child) {
-                    print("Countdown actualizado: ${appData.countdown}");
                     return Column(
                       children: [
                         Text(
-                          'Countdown: ${appData.countdown}',
+                          'La partida comenzara en: ${appData.countdown ?? "-"}!',
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -72,29 +104,13 @@ class IntroPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white.withOpacity(0.1),
-                            shadowColor: Colors.black45,
-                            elevation: 10,
-                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              side: BorderSide(color: Colors.white.withOpacity(0.3)),
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (_) => const Layout()),
-                            );
-                          },
-                          child: const Text(
-                            'Entrar al juego',
-                            style: TextStyle(
+                        if (restartMessage != null)
+                          Text(
+                            restartMessage!,
+                            style: const TextStyle(
                               fontSize: 18,
+                              color: Colors.redAccent,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
                               shadows: [
                                 Shadow(
                                   blurRadius: 5,
@@ -103,13 +119,12 @@ class IntroPage extends StatelessWidget {
                                 ),
                               ],
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
                       ],
                     );
                   },
-                )
-
+                ),
               ],
             ),
           ),

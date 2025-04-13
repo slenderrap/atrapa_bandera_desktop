@@ -20,9 +20,10 @@ class AppData extends ChangeNotifier {
   Map<String, dynamic> gameData = {};     // Dades de 'game_data.json'
   Map<String, ui.Image> imagesCache = {}; // Imatges
   Map<String, dynamic> gameState = {};    // Estat rebut del servidor
-  Map<String, dynamic> countdown = {};    // Estat rebut del servidor
+  int countdown = 0;    // Estat rebut del servidor
   Map<String, dynamic> gameStart = {};
   Map<String, dynamic> restart = {};
+  Map<String, dynamic> gameOver = {};
   dynamic playerData;                     // Apuntador al jugador (a gameState)
   Camera camera = Camera();
 
@@ -76,19 +77,27 @@ class AppData extends ChangeNotifier {
         notifyListeners();
       }
       if (data["type"] == "countdown"){
-        countdown = data;
+        countdown = data["timeleft"];
         print("Countdown en app_data:");
-        print(countdown);
+        // print(countdown);
+        notifyListeners();
       }
       if (data["type"] == "gameStart"){
         gameStart = data;
         // print(gameStart);
+        notifyListeners();
       }
       if (data["type"] == "restart"){
         restart = data;
         // print(restart);
+        notifyListeners();
       }
-      // print(data);
+      if (data["type"] == "gameOver"){
+        gameOver = data;
+        // print(gameOver);
+        notifyListeners();
+      }
+      print(data);
     } catch (e) {
       if (kDebugMode) {
         print("Error processant missatge WebSocket: $e");

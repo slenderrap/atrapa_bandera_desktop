@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'app_data.dart';
+import 'introPage.dart';
 import 'canvas_painter.dart';
 
 class Layout extends StatefulWidget {
@@ -19,49 +21,24 @@ class _LayoutState extends State<Layout> {
   @override
   void initState() {
     super.initState();
-    // Preload image assets into cache
+    final appData = Provider.of<AppData>(context, listen: false);
+
+    // Preload image
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final appData = Provider.of<AppData>(context, listen: false);
       await appData.getImage("key.png");
     });
+
+    // Escuchar cambios en gameOver
+    appData.addListener(() {
+      if (appData.gameOver.isNotEmpty) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const IntroPage()),
+        );
+        appData.gameStart = {};
+      }
+    });
   }
-
-  // // Tractar què passa quan el jugador apreta una tecla
-  // void _onKeyEvent(KeyEvent event, AppData appData) {
-  //   String key = event.logicalKey.keyLabel.toLowerCase();
-
-  //   if (event is KeyDownEvent) {
-  //     if (event.logicalKey == LogicalKeyboardKey.space) {
-  //       appData.sendMessage(jsonEncode({"type": "jump"}));
-  //       return;
-  //     }
-  //     _pressedKeys.add(key);
-  //   } else if (event is KeyUpEvent) {
-  //     _pressedKeys.remove(key);
-  //   }
-
-    // // Enviar la direcció escollida pel jugador al servidor
-    // var direction = _getDirectionFromKeys();
-    // appData.sendMessage(jsonEncode({"type": "direction", "value": direction}));
-  // }
-
-  // String _getDirectionFromKeys() {
-  //   bool up = _pressedKeys.contains("arrow up");
-  //   bool down = _pressedKeys.contains("arrow down");
-  //   bool left = _pressedKeys.contains("arrow left");
-  //   bool right = _pressedKeys.contains("arrow right");
-
-  //   if (up && left) return "upLeft";
-  //   if (up && right) return "upRight";
-  //   if (down && left) return "downLeft";
-  //   if (down && right) return "downRight";
-  //   if (up) return "up";
-  //   if (down) return "down";
-  //   if (left) return "left";
-  //   if (right) return "right";
-
-  //   return "none";
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -73,10 +50,6 @@ class _LayoutState extends State<Layout> {
           color: CupertinoColors.systemGrey5,
           child: Focus(
             autofocus: true,
-            // onKeyEvent: (node, event) {
-            //   _onKeyEvent(event, appData);
-            //   return KeyEventResult.handled;
-            // },
             child: CustomPaint(
               painter: CanvasPainter(appData),
               child: Container(),
