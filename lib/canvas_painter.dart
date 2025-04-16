@@ -5,6 +5,19 @@ import 'app_data.dart';
 class CanvasPainter extends CustomPainter {
   final AppData appData;
 
+  Map directions_run = {
+    "left": [Offset(0, 0), Offset(64, 0), Offset(128, 0), Offset(192, 0), Offset(256, 0), Offset(320, 0), Offset(384, 0), Offset(448, 0)],
+    "up": [Offset(0, 64), Offset(64, 64), Offset(128, 64), Offset(192, 64), Offset(256, 64), Offset(320, 64), Offset(384, 64), Offset(448, 64)],
+    "right": [Offset(0, 128), Offset(64, 128), Offset(128, 128), Offset(192, 128), Offset(256, 128), Offset(320, 128), Offset(384, 128), Offset(448, 128)],
+    "down": [Offset(0, 192), Offset(64, 192), Offset(128, 192), Offset(192, 192), Offset(256, 192), Offset(320, 192), Offset(384, 192), Offset(448, 192)]
+  };
+
+  Map directions_walk = {
+    "left": [Offset(0, 0), Offset(64, 0), Offset(128, 0), Offset(192, 0), Offset(256, 0), Offset(320, 0)],
+    "up": [Offset(0, 64), Offset(64, 64), Offset(128, 64), Offset(192, 64), Offset(256, 64), Offset(320, 64)],
+    "right": [Offset(0, 128), Offset(64, 128), Offset(128, 128), Offset(192, 128), Offset(256, 128), Offset(320, 128)],
+    "down": [Offset(0, 192), Offset(64, 192), Offset(128, 192), Offset(192, 192), Offset(256, 192), Offset(320, 192)]
+  };
   CanvasPainter(this.appData);
 
   @override
@@ -118,27 +131,47 @@ class CanvasPainter extends CustomPainter {
     );
   }
 
-  // Get arrow tile position in the spritesheet
-  Offset _getArrowTile(String direction) {
+  Offset _getDirectionTile(String direction, bool hasFlag) {
+      if (direction.contains("up")){
+        direction = "up";
+      } else if (direction.contains("down")){
+        direction = "down";
+      }
+
     switch (direction) {
       case "left":
-        return Offset(64, 0);
-      case "upLeft":
-        return Offset(128, 0);
+        if(hasFlag){
+          return directions_walk[direction];
+        } else{
+          return directions_run[direction];
+        }
       case "up":
-        return Offset(192, 0);
-      case "upRight":
-        return Offset(256, 0);
+        
+        if(hasFlag){
+          return directions_walk[direction];
+        } else{
+          return directions_run[direction];
+        }
       case "right":
-        return Offset(320, 0);
-      case "downRight":
-        return Offset(384, 0);
+        
+        if(hasFlag){
+          return directions_walk[direction];
+        } else{
+          return directions_run[direction];
+        }
       case "down":
-        return Offset(448, 0);
-      case "downLeft":
-        return Offset(512, 0);
+        
+        if(hasFlag){
+          return directions_walk[direction];
+        } else{
+          return directions_run[direction];
+        }
       default:
-        return Offset(0, 0);
+        if(hasFlag){
+          return directions_walk[direction];
+        } else{
+          return directions_run[direction];
+        }
     }
   }
 
@@ -153,14 +186,43 @@ class CanvasPainter extends CustomPainter {
         return Colors.blue;
       case "vampire":
         return Colors.orange;
-      case "red":
-        return Colors.red;
-      case "purple":
-        return Colors.purple;
-      case "black":
-        return Colors.black;
       default:
         return Colors.black;
+    }
+  }
+  
+  static String _getImageFromRace(String race, bool hasFlag) {
+    switch (race.toLowerCase()) {
+      case "orc":
+        if(hasFlag){
+          return "Orc_Walk_full.png";
+        } else{
+          return "Orc_Run_full.png";
+        }
+      case "human":
+        if(hasFlag){
+          return "Unarmed_Walk_full.png";
+        } else{
+          return "Unarmed_Run_full.png";
+        }
+      case "slime":
+        if(hasFlag){
+          return "Slime_Walk_full.png";
+        } else{
+          return "Slime_Run_full.png";
+        }
+      case "vampire":
+        if(hasFlag){
+          return "Vampires_Walk_full.png";
+        } else{
+          return "Vampires_Run_full.png";
+        }
+      default:
+        if(hasFlag){
+          return "Unarmed_Walk_full.png";
+        } else{
+          return "Unarmed_Run_full.png";
+        }
     }
   }
 
@@ -345,6 +407,7 @@ class CanvasPainter extends CustomPainter {
     final double playerHeight = (player["width"] as num).toDouble();
     final String color = player["race"];
     final String direction = player["direction"];
+    final bool hasFlag = player["pickedUp"];
 
     // Get player position
     final Offset screenPos = worldToScreen(
@@ -359,10 +422,10 @@ class CanvasPainter extends CustomPainter {
     canvas.drawRect(rect, paint);
 
     // Draw direction arrow
-    final String arrowPath = "images/arrows.png";
+    final String arrowPath = _getImageFromRace(color, hasFlag);
     if (appData.imagesCache.containsKey(arrowPath)) {
       final ui.Image arrowsImage = appData.imagesCache[arrowPath]!;
-      final Offset tilePos = _getArrowTile(direction);
+      final Offset tilePos = _getDirectionTile(direction, hasFlag);
       const Size tileSize = Size(64, 64); // Arrow tiles are 64x64
       final Size scaledSize = Size(rect.width, rect.height);
 

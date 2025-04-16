@@ -26,6 +26,14 @@ class _LayoutState extends State<Layout> {
     // Preload image
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await appData.getImage("key.png");
+      await appData.getImage("Orc_Walk_full.png");
+      await appData.getImage("Orc_Run_full.png");
+      await appData.getImage("Unarmed_Walk_full.png");
+      await appData.getImage("Unarmed_Run_full.png");
+      await appData.getImage("Slime_Walk_full.png");
+      await appData.getImage("Slime_Run_full.png");
+      await appData.getImage("Vampires_Walk_full.png");
+      await appData.getImage("Vampires_Run_full.png");
     });
 
     // Escuchar cambios en gameOver
