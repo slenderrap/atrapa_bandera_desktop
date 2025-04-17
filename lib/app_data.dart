@@ -78,7 +78,7 @@ class AppData extends ChangeNotifier {
       }
       if (data["type"] == "countdown"){
         countdown = data["timeleft"];
-        print("Countdown en app_data:");
+        // print("Countdown en app_data:");
         // print(countdown);
         notifyListeners();
       }

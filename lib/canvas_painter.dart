@@ -6,17 +6,17 @@ class CanvasPainter extends CustomPainter {
   final AppData appData;
 
   Map directions_run = {
-    "left": [Offset(0, 0), Offset(64, 0), Offset(128, 0), Offset(192, 0), Offset(256, 0), Offset(320, 0), Offset(384, 0), Offset(448, 0)],
+    "down": [Offset(0, 0), Offset(64, 0), Offset(128, 0), Offset(192, 0), Offset(256, 0), Offset(320, 0), Offset(384, 0), Offset(448, 0)],
     "up": [Offset(0, 64), Offset(64, 64), Offset(128, 64), Offset(192, 64), Offset(256, 64), Offset(320, 64), Offset(384, 64), Offset(448, 64)],
-    "right": [Offset(0, 128), Offset(64, 128), Offset(128, 128), Offset(192, 128), Offset(256, 128), Offset(320, 128), Offset(384, 128), Offset(448, 128)],
-    "down": [Offset(0, 192), Offset(64, 192), Offset(128, 192), Offset(192, 192), Offset(256, 192), Offset(320, 192), Offset(384, 192), Offset(448, 192)]
+    "left": [Offset(0, 128), Offset(64, 128), Offset(128, 128), Offset(192, 128), Offset(256, 128), Offset(320, 128), Offset(384, 128), Offset(448, 128)],
+    "right": [Offset(0, 192), Offset(64, 192), Offset(128, 192), Offset(192, 192), Offset(256, 192), Offset(320, 192), Offset(384, 192), Offset(448, 192)]
   };
 
   Map directions_walk = {
-    "left": [Offset(0, 0), Offset(64, 0), Offset(128, 0), Offset(192, 0), Offset(256, 0), Offset(320, 0)],
+    "down": [Offset(0, 0), Offset(64, 0), Offset(128, 0), Offset(192, 0), Offset(256, 0), Offset(320, 0)],
     "up": [Offset(0, 64), Offset(64, 64), Offset(128, 64), Offset(192, 64), Offset(256, 64), Offset(320, 64)],
-    "right": [Offset(0, 128), Offset(64, 128), Offset(128, 128), Offset(192, 128), Offset(256, 128), Offset(320, 128)],
-    "down": [Offset(0, 192), Offset(64, 192), Offset(128, 192), Offset(192, 192), Offset(256, 192), Offset(320, 192)]
+    "left": [Offset(0, 128), Offset(64, 128), Offset(128, 128), Offset(192, 128), Offset(256, 128), Offset(320, 128)],
+    "right": [Offset(0, 192), Offset(64, 192), Offset(128, 192), Offset(192, 192), Offset(256, 192), Offset(320, 192)]
   };
   CanvasPainter(this.appData);
 
@@ -131,49 +131,32 @@ class CanvasPainter extends CustomPainter {
     );
   }
 
-  Offset _getDirectionTile(String direction, bool hasFlag) {
-      if (direction.contains("up")){
-        direction = "up";
-      } else if (direction.contains("down")){
-        direction = "down";
-      }
+  Offset _getDirectionTile(String direction, bool hasFlag, int tickCounter) {
+    if (direction.contains("up")) {
+      direction = "up";
+    } else if (direction.contains("down")) {
+      direction = "down";
+    }
+
+    List<Offset> tileList;
 
     switch (direction) {
       case "left":
-        if(hasFlag){
-          return directions_walk[direction];
-        } else{
-          return directions_run[direction];
-        }
       case "up":
-        
-        if(hasFlag){
-          return directions_walk[direction];
-        } else{
-          return directions_run[direction];
-        }
       case "right":
-        
-        if(hasFlag){
-          return directions_walk[direction];
-        } else{
-          return directions_run[direction];
-        }
       case "down":
-        
-        if(hasFlag){
-          return directions_walk[direction];
-        } else{
-          return directions_run[direction];
-        }
+        tileList = hasFlag ? directions_walk[direction]! : directions_run[direction]!;
+        break;
       default:
-        if(hasFlag){
-          return directions_walk[direction];
-        } else{
-          return directions_run[direction];
-        }
+        tileList = hasFlag ? directions_walk["down"]! : directions_run["down"]!;
+        break;
     }
+
+    // Cada grupo de 3 ticks corresponde a una posición
+    int index = (tickCounter ~/ 3) % tileList.length;
+    return tileList[index];
   }
+
 
   // Convert color string to Flutter Color
   static Color _getColorFromString(String color) {
@@ -282,54 +265,60 @@ class CanvasPainter extends CustomPainter {
 
 
   void drawKeys(Canvas canvas, Size painterSize) {
-    final level = appData.gameData["levels"].firstWhere(
-      (lvl) => lvl["name"] == appData.gameState["level"],
-      orElse: () => null,
+  final level = appData.gameData["levels"].firstWhere(
+    (lvl) => lvl["name"] == appData.gameState["level"],
+    orElse: () => null,
+  );
+  if (level == null) return;
+
+  final sprites = level["sprites"] as List<dynamic>;
+  final keySprite = sprites.firstWhere(
+    (sprite) => sprite["type"] == "key",
+    orElse: () => null,
+  );
+  if (keySprite == null) return;
+
+  final String spritePath = "${keySprite["imageFile"]}";
+  if (!appData.imagesCache.containsKey(spritePath)) return;
+
+  final ui.Image spriteImg = appData.imagesCache[spritePath]!;
+  final camData = _getCameraAndScale(painterSize);
+  final scale = camData['scale'];
+  final tickCounter = appData.gameState["tickCounter"] ?? 0;
+
+  final keys = appData.gameState["keys"];
+  if (keys == null) return;
+
+  const frameWidth = 16.0;
+  const frameHeight = 32.0;
+  const totalFrames = 6;
+
+  for (var key in keys) {
+    if (key["pickedUp"] == true) continue;
+
+    final Offset screenPos = worldToScreen(
+      key["x"].toDouble(),
+      key["y"].toDouble(),
+      painterSize,
     );
-    if (level == null) return;
 
-    final sprites = level["sprites"] as List<dynamic>;
-    final keySprite = sprites.firstWhere(
-      (sprite) => sprite["type"] == "key",
-      orElse: () => null,
+    final destWidth = key["width"] * scale;
+    final destHeight = key["height"] * scale;
+
+    // Animación: calcular frame actual
+    final int currentFrame = tickCounter % totalFrames;
+    final Offset spriteOffset = Offset(currentFrame * frameWidth, 0);
+
+    drawSpriteFromSheet(
+      canvas,
+      spriteImg,
+      Rect.fromLTWH(spriteOffset.dx, spriteOffset.dy, frameWidth, frameHeight),
+      screenPos,
+      Size(destWidth, destHeight),
     );
-    if (keySprite == null) return;
-
-    final String spritePath = "${keySprite["imageFile"]}";
-    if (!appData.imagesCache.containsKey(spritePath)) return;
-
-    final ui.Image spriteImg = appData.imagesCache[spritePath]!;
-    final camData = _getCameraAndScale(painterSize);
-    final scale = camData['scale'];
-
-    final keys = appData.gameState["keys"];
-    if (keys == null) return;
-
-    for (var key in keys) {
-      if (key["pickedUp"] == true) continue;
-
-      final Offset screenPos = worldToScreen(
-        key["x"].toDouble(),
-        key["y"].toDouble(),
-        painterSize,
-      );
-
-      final destWidth = key["width"] * scale;
-      final destHeight = key["height"] * scale;
-
-      canvas.drawImageRect(
-        spriteImg,
-        Rect.fromLTWH(0, 0, spriteImg.width.toDouble(), spriteImg.height.toDouble()),
-        Rect.fromLTWH(
-          screenPos.dx - destWidth / 2,
-          screenPos.dy - destHeight / 2,
-          destWidth,
-          destHeight,
-        ),
-        Paint(),
-      );
-    }
   }
+}
+
 
   void drawFlag(Canvas canvas, Size painterSize) {
     final level = appData.gameData["levels"].firstWhere(
@@ -400,43 +389,79 @@ class CanvasPainter extends CustomPainter {
   }
 
   void drawPlayer(Canvas canvas, Size painterSize, Map<String, dynamic> player) {
-    final camData = _getCameraAndScale(painterSize);
-    final scale = camData['scale'];
+  print("ENTRO EN DRAWPLAYER");
 
-    final double playerWidth = (player["width"] as num).toDouble();
-    final double playerHeight = (player["width"] as num).toDouble();
-    final String color = player["race"];
-    final String direction = player["direction"];
-    final bool hasFlag = player["pickedUp"];
+  final camData = _getCameraAndScale(painterSize);
+  final scale = camData['scale'];
+  print("Scale obtenida: $scale");
 
-    // Get player position
-    final Offset screenPos = worldToScreen(
-      player["x"].toDouble(),
-      player["y"].toDouble(),
-      painterSize,
+
+
+        final double playerWidth = (player["width"] as num).toDouble();
+        print("playerWidth: $playerWidth");
+
+        final double playerHeight = (player["height"] as num).toDouble(); // <-- ¿Quizás debería ser 'height'?
+        print("playerHeight: $playerHeight");
+
+        final String color = player["race"];
+        print("color (race): $color");
+
+        final String direction = player["direction"];
+        print("direction: $direction");
+
+        // final bool hasFlag = player["pickedUp"];
+        // print("hasFlag (pickedUp): $hasFlag");
+        
+        final bool hasFlag = true;
+
+        final int tickCounter = appData.gameState["tickCounter"] ?? 0;
+
+  print("Player data - width: $playerWidth, height: $playerHeight, race: $color, direction: $direction, hasFlag: $hasFlag");
+
+  // Get player position
+  final Offset screenPos = worldToScreen(
+    player["x"].toDouble(),
+    player["y"].toDouble(),
+    painterSize,
+  );
+
+  print("Player world position: x=${player["x"]}, y=${player["y"]}");
+  print("Screen position: dx=${screenPos.dx}, dy=${screenPos.dy}");
+
+  // Draw player rectangle
+  final Paint paint = Paint()..color = _getColorFromString(color);
+  final rect = Rect.fromLTWH(screenPos.dx, screenPos.dy, playerWidth * scale, playerHeight * scale);
+  // canvas.drawRect(rect, paint);
+
+  print("Rect dibujado en: ${rect.left}, ${rect.top}, ${rect.width}, ${rect.height}");
+
+  // Draw direction arrow
+  final String arrowPath = _getImageFromRace(color, hasFlag);
+  print("Arrow path: $arrowPath");
+
+  if (appData.imagesCache.containsKey(arrowPath)) {
+    final ui.Image arrowsImage = appData.imagesCache[arrowPath]!;
+    final Offset tilePos = _getDirectionTile(direction, hasFlag, tickCounter);
+
+    print("Tile de dirección seleccionado en la hoja: dx=${tilePos.dx}, dy=${tilePos.dy}");
+
+    const Size tileSize = Size(64, 64); // Arrow tiles are 64x64
+    final Size scaledSize = Size((rect.width * 3), (rect.height * 3));
+
+    print("Llamando a drawSpriteFromSheet con scaledSize: $scaledSize");
+
+    drawSpriteFromSheet(
+      canvas,
+      arrowsImage,
+      Rect.fromLTWH(tilePos.dx, tilePos.dy, tileSize.width, tileSize.height),
+      screenPos,
+      scaledSize,
     );
 
-    // Draw player rectangle
-    final Paint paint = Paint()..color = _getColorFromString(color);
-    final rect = Rect.fromLTWH(screenPos.dx, screenPos.dy, playerWidth * scale, playerHeight * scale);
-    canvas.drawRect(rect, paint);
-
-    // Draw direction arrow
-    final String arrowPath = _getImageFromRace(color, hasFlag);
-    if (appData.imagesCache.containsKey(arrowPath)) {
-      final ui.Image arrowsImage = appData.imagesCache[arrowPath]!;
-      final Offset tilePos = _getDirectionTile(direction, hasFlag);
-      const Size tileSize = Size(64, 64); // Arrow tiles are 64x64
-      final Size scaledSize = Size(rect.width, rect.height);
-
-      drawSpriteFromSheet(
-        canvas,
-        arrowsImage,
-        Rect.fromLTWH(tilePos.dx, tilePos.dy, tileSize.width, tileSize.height),
-        screenPos,
-        scaledSize,
-      );
-    }
+    print("Sprite dibujado con éxito.");
+  } else {
+    print("Arrow image '$arrowPath' no encontrada en el cache.");
+  }
 
     // Draw flag on top of player if they own it
     final flagOwnerId = appData.gameState["flagOwnerId"];
@@ -460,7 +485,6 @@ class CanvasPainter extends CustomPainter {
       
       final ui.Image spriteImg = appData.imagesCache[spritePath]!;
       final int frameCount = (spriteImg.width / flagSprite["width"]).floor();
-      final int tickCounter = appData.gameState["tickCounter"] ?? 0;
       final double frameIndex = (tickCounter % frameCount).toDouble();
       final double srcX = frameIndex * flagSprite["width"];
       
