@@ -18,10 +18,9 @@ class IntroPage extends StatefulWidget {
     super.didChangeDependencies();
     final appData = Provider.of<AppData>(context);
 
-    if (!hasNavigated) {
-      print(appData.restart);
-      if (appData.gameStart.isNotEmpty) {
-        hasNavigated = true;
+    if (!appData.alreadyNavigated) {
+      if (appData.gameStart.isNotEmpty || !appData.gameState["gameOver"]) {
+        appData.alreadyNavigated = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           Navigator.pushReplacement(
             context,
@@ -32,7 +31,7 @@ class IntroPage extends StatefulWidget {
         setState(() {
           restartMessage = "No hay suficientes jugadores para empezar la partida!";
         });
-        print(appData.restart);
+        // print(appData.restart);
         appData.restart = {};
       } else if (appData.countdown > 0){
         setState(() {

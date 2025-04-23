@@ -28,8 +28,13 @@ class _LayoutState extends State<Layout> {
       await appData.getImage("key.png");
       await appData.getImage("Orc_Walk_full.png");
       await appData.getImage("Orc_Run_full.png");
-      await appData.getImage("Unarmed_Walk_full.png");
-      await appData.getImage("Unarmed_Run_full.png");
+
+      await appData.getImage("Sword_Walk_full.png");
+      await appData.getImage("Sword_Run_full.png");
+      await appData.getImage("Sword_attack_full.png");
+      await appData.getImage("Sword_Death_full.png");
+      await appData.getImage("Sword_Hurt_full.png");
+
       await appData.getImage("Slime_Walk_full.png");
       await appData.getImage("Slime_Run_full.png");
       await appData.getImage("Vampires_Walk_full.png");
@@ -44,6 +49,7 @@ class _LayoutState extends State<Layout> {
           MaterialPageRoute(builder: (_) => const IntroPage()),
         );
         appData.gameStart = {};
+        appData.resetGameState();
       }
     });
   }

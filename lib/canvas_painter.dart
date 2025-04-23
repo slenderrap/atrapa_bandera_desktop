@@ -38,10 +38,10 @@ class CanvasPainter extends CustomPainter {
 
     if (gameState.isNotEmpty && gameData.isNotEmpty) {
 
-      // print("gameData");
-      // print(gameData);
-      // print("gameState");
-      // print(gameState);
+      // 
+      // 
+      // 
+      // 
 
       // Get level data
       if (gameState["level"] != null) {
@@ -72,7 +72,7 @@ class CanvasPainter extends CustomPainter {
       if (gameState["players"] != null) {
         for (var player in gameState["players"]) {
           if(player["id"][0] == "C"){
-            print("PLAYER ID: " + player["id"][0]);
+            
             drawPlayer(canvas, painterSize, player);
           }
         }
@@ -184,9 +184,9 @@ class CanvasPainter extends CustomPainter {
         }
       case "human":
         if(hasFlag){
-          return "Unarmed_Walk_full.png";
+          return "Sword_Walk_full.png";
         } else{
-          return "Unarmed_Run_full.png";
+          return "Sword_Run_full.png";
         }
       case "slime":
         if(hasFlag){
@@ -202,9 +202,9 @@ class CanvasPainter extends CustomPainter {
         }
       default:
         if(hasFlag){
-          return "Unarmed_Walk_full.png";
+          return "Sword_Walk_full.png";
         } else{
-          return "Unarmed_Run_full.png";
+          return "Sword_Run_full.png";
         }
     }
   }
@@ -389,34 +389,34 @@ class CanvasPainter extends CustomPainter {
   }
 
   void drawPlayer(Canvas canvas, Size painterSize, Map<String, dynamic> player) {
-  print("ENTRO EN DRAWPLAYER");
+  
 
   final camData = _getCameraAndScale(painterSize);
   final scale = camData['scale'];
-  print("Scale obtenida: $scale");
+  
 
 
 
         final double playerWidth = (player["width"] as num).toDouble();
-        print("playerWidth: $playerWidth");
+        
 
         final double playerHeight = (player["height"] as num).toDouble(); // <-- ¿Quizás debería ser 'height'?
-        print("playerHeight: $playerHeight");
+        
 
         final String color = player["race"];
-        print("color (race): $color");
+        
 
         final String direction = player["direction"];
-        print("direction: $direction");
+        
 
         // final bool hasFlag = player["pickedUp"];
-        // print("hasFlag (pickedUp): $hasFlag");
+        // 
         
         final bool hasFlag = true;
 
         final int tickCounter = appData.gameState["tickCounter"] ?? 0;
 
-  print("Player data - width: $playerWidth, height: $playerHeight, race: $color, direction: $direction, hasFlag: $hasFlag");
+  
 
   // Get player position
   final Offset screenPos = worldToScreen(
@@ -425,30 +425,30 @@ class CanvasPainter extends CustomPainter {
     painterSize,
   );
 
-  print("Player world position: x=${player["x"]}, y=${player["y"]}");
-  print("Screen position: dx=${screenPos.dx}, dy=${screenPos.dy}");
+  
+  
 
   // Draw player rectangle
   final Paint paint = Paint()..color = _getColorFromString(color);
   final rect = Rect.fromLTWH(screenPos.dx, screenPos.dy, playerWidth * scale, playerHeight * scale);
   // canvas.drawRect(rect, paint);
 
-  print("Rect dibujado en: ${rect.left}, ${rect.top}, ${rect.width}, ${rect.height}");
+  
 
   // Draw direction arrow
   final String arrowPath = _getImageFromRace(color, hasFlag);
-  print("Arrow path: $arrowPath");
+  
 
   if (appData.imagesCache.containsKey(arrowPath)) {
     final ui.Image arrowsImage = appData.imagesCache[arrowPath]!;
     final Offset tilePos = _getDirectionTile(direction, hasFlag, tickCounter);
 
-    print("Tile de dirección seleccionado en la hoja: dx=${tilePos.dx}, dy=${tilePos.dy}");
+    
 
     const Size tileSize = Size(64, 64); // Arrow tiles are 64x64
     final Size scaledSize = Size((rect.width * 3), (rect.height * 3));
 
-    print("Llamando a drawSpriteFromSheet con scaledSize: $scaledSize");
+    
 
     drawSpriteFromSheet(
       canvas,
@@ -458,9 +458,9 @@ class CanvasPainter extends CustomPainter {
       scaledSize,
     );
 
-    print("Sprite dibujado con éxito.");
+    
   } else {
-    print("Arrow image '$arrowPath' no encontrada en el cache.");
+    
   }
 
     // Draw flag on top of player if they own it

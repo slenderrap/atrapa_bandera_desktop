@@ -19,11 +19,13 @@ class AppData extends ChangeNotifier {
   // Atributs per gestionar el joc
   Map<String, dynamic> gameData = {};     // Dades de 'game_data.json'
   Map<String, ui.Image> imagesCache = {}; // Imatges
-  Map<String, dynamic> gameState = {};    // Estat rebut del servidor
+  Map<String, dynamic> gameState = {"gameOver": true};    // Estat rebut del servidor
   int countdown = 0;    // Estat rebut del servidor
   Map<String, dynamic> gameStart = {};
   Map<String, dynamic> restart = {};
   Map<String, dynamic> gameOver = {};
+  bool alreadyNavigated = false;
+
   dynamic playerData;                     // Apuntador al jugador (a gameState)
   Camera camera = Camera();
 
@@ -97,7 +99,7 @@ class AppData extends ChangeNotifier {
         // print(gameOver);
         notifyListeners();
       }
-      print(data);
+      // print(data);
     } catch (e) {
       if (kDebugMode) {
         print("Error processant missatge WebSocket: $e");
@@ -233,6 +235,14 @@ class AppData extends ChangeNotifier {
   }
 }
 
-
-
+void resetGameState() {
+  gameStart = {};
+  gameState = {"gameOver": true};
+  restart = {};
+  gameOver = {};
+  countdown = 0;
+  playerData = null;
+  alreadyNavigated = false;
+  notifyListeners();
+}
 }
