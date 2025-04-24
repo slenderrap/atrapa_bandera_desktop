@@ -72,8 +72,10 @@ class CanvasPainter extends CustomPainter {
       if (gameState["players"] != null) {
         for (var player in gameState["players"]) {
           if(player["id"][0] == "C"){
-            
-            drawPlayer(canvas, painterSize, player);
+            // print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAV");
+            // print(gameState["keys"]);
+            // print("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
+            drawPlayer(canvas, painterSize, player, gameState["keys"]);
           }
         }
       }
@@ -122,8 +124,8 @@ class CanvasPainter extends CustomPainter {
       spriteSheet,
       srcRect,
       Rect.fromLTWH(
-        destPos.dx,
-        destPos.dy,
+        destPos.dx - destSize.width / 2,
+        destPos.dy - destSize.height / 2,
         destSize.width,
         destSize.height,
       ),
@@ -388,8 +390,9 @@ class CanvasPainter extends CustomPainter {
     }
   }
 
-  void drawPlayer(Canvas canvas, Size painterSize, Map<String, dynamic> player) {
+  void drawPlayer(Canvas canvas, Size painterSize, Map<String, dynamic> player, List<dynamic> keys) {
   
+    // print(keys);
 
   final camData = _getCameraAndScale(painterSize);
   final scale = camData['scale'];
@@ -408,11 +411,17 @@ class CanvasPainter extends CustomPainter {
 
         final String direction = player["direction"];
         
+        bool hasFlag = true;
 
-        // final bool hasFlag = player["pickedUp"];
-        // 
-        
-        final bool hasFlag = true;
+        for (var key in keys){
+          if(key["keyOwnerId"] == player["id"]){
+            hasFlag = true;
+          } else{
+            hasFlag = false;
+          }
+          print("HasFlag: ");
+          print(hasFlag);
+        }
 
         final int tickCounter = appData.gameState["tickCounter"] ?? 0;
 
@@ -463,10 +472,9 @@ class CanvasPainter extends CustomPainter {
     
   }
 
-    // Draw flag on top of player if they own it
-    final flagOwnerId = appData.gameState["flagOwnerId"];
-    if (flagOwnerId == player["id"]) {
-      // Find flag sprite
+    // Draw key on top of player if they own it
+    if (hasFlag) {
+      // Buscar sprite de llave
       final level = appData.gameData["levels"].firstWhere(
         (lvl) => lvl["name"] == appData.gameState["level"],
         orElse: () => null,
@@ -474,39 +482,48 @@ class CanvasPainter extends CustomPainter {
       if (level == null) return;
 
       final sprites = level["sprites"] as List<dynamic>;
-      final flagSprite = sprites.firstWhere(
-        (sprite) => sprite["type"] == "flag",
+      final keySprite = sprites.firstWhere(
+        (sprite) => sprite["type"] == "key",
         orElse: () => null,
       );
-      if (flagSprite == null) return;
+      if (keySprite == null) return;
 
-      final String spritePath = "assets/${flagSprite["imageFile"]}";
+      final String spritePath = "${keySprite["imageFile"]}";
       if (!appData.imagesCache.containsKey(spritePath)) return;
-      
+
       final ui.Image spriteImg = appData.imagesCache[spritePath]!;
-      final int frameCount = (spriteImg.width / flagSprite["width"]).floor();
-      final double frameIndex = (tickCounter % frameCount).toDouble();
-      final double srcX = frameIndex * flagSprite["width"];
-      
-      // Draw small flag on top of player
-      final double flagScale = 0.5; // Make flag smaller than player
-      final double flagWidth = flagSprite["width"] * scale * flagScale;
-      final double flagHeight = flagSprite["height"] * scale * flagScale;
-      
-      // Position flag above player
-      final Offset flagPos = Offset(
-        screenPos.dx,
-        screenPos.dy,
+      final int tickCounter = appData.gameState["tickCounter"] ?? 0;
+
+      // Parámetros de la animación
+      const double frameWidth = 16.0;
+      const double frameHeight = 32.0;
+      const int totalFrames = 6;
+      final int currentFrame = tickCounter % totalFrames;
+      final double srcX = currentFrame * frameWidth;
+
+      // Escala pequeña de la llave
+      final double keyScale = 1;
+      final double keyWidth = frameWidth * scale * keyScale;
+      final double keyHeight = frameHeight * scale * keyScale;
+
+      // Centro horizontal del jugador
+      final double playerCenterX = screenPos.dx + (playerWidth * scale) / 2;
+
+      // Posicionar la llave justo encima y centrada
+      final Offset keyPos = Offset(
+        playerCenterX - keyWidth / 2,
+        screenPos.dy - keyHeight,
       );
-      
+
+
       canvas.drawImageRect(
         spriteImg,
-        Rect.fromLTWH(srcX, 0, flagSprite["width"].toDouble(), flagSprite["height"].toDouble()),
+        Rect.fromLTWH(srcX, 0, frameWidth, frameHeight),
         Rect.fromLTWH(
-          flagPos.dx + playerWidth / 2,
-          flagPos.dy - flagHeight,
-          flagWidth,
-          flagHeight,
+          keyPos.dx,
+          keyPos.dy,
+          keyWidth,
+          keyHeight,
         ),
         Paint(),
       );
