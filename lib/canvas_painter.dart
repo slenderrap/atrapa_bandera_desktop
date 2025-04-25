@@ -155,8 +155,14 @@ class CanvasPainter extends CustomPainter {
         break;
     }
 
+    int t = 3;
+
+    if (hasFlag){
+      t = 6;
+    }
+
     // Cada grupo de 3 ticks corresponde a una posición
-    int index = (tickCounter ~/ 3) % tileList.length;
+    int index = (tickCounter ~/ t) % tileList.length;
     return tileList[index];
   }
 
@@ -309,7 +315,8 @@ class CanvasPainter extends CustomPainter {
     final destHeight = key["height"] * scale;
 
     // Animación: calcular frame actual
-    final int currentFrame = tickCounter % totalFrames;
+    final int frameDuration = 4; // Aumenta este valor para que sea más lento
+    final int currentFrame = (tickCounter ~/ frameDuration) % totalFrames;
     final Offset spriteOffset = Offset(currentFrame * frameWidth, 0);
 
     drawSpriteFromSheet(
@@ -392,87 +399,50 @@ class CanvasPainter extends CustomPainter {
   }
 
   void drawPlayer(Canvas canvas, Size painterSize, Map<String, dynamic> player, List<dynamic> keys) {
-  
-    // print(keys);
-
-  final camData = _getCameraAndScale(painterSize);
-  final scale = camData['scale'];
-  
-
-
-
-        final double playerWidth = (player["width"] as num).toDouble();
-        
-
-        final double playerHeight = (player["height"] as num).toDouble(); // <-- ¿Quizás debería ser 'height'?
-        
-
-        final String color = player["race"];
-        
-
-        final String direction = player["direction"];
-        
-        bool hasFlag = true;
-
-        for (var key in keys){
-          if(key["keyOwnerId"] == player["id"]){
-            hasFlag = true;
-          } else{
-            hasFlag = false;
+    final camData = _getCameraAndScale(painterSize);
+    final scale = camData['scale'];
+          final double playerWidth = (player["width"] as num).toDouble();
+          final double playerHeight = (player["height"] as num).toDouble(); // <-- ¿Quizás debería ser 'height'?
+          final String color = player["race"];
+          final String direction = player["direction"];
+          bool hasFlag = true;
+          for (var key in keys){
+            if(key["keyOwnerId"] == player["id"]){
+              hasFlag = true;
+            } else{
+              hasFlag = false;
+            }
+            print("HasFlag: ");
+            print(hasFlag);
           }
-          print("HasFlag: ");
-          print(hasFlag);
-        }
-
-        final int tickCounter = appData.gameState["tickCounter"] ?? 0;
-
-  
-
-  // Get player position
-  final Offset screenPos = worldToScreen(
-    player["x"].toDouble(),
-    player["y"].toDouble(),
-    painterSize,
-  );
-
-  
-  
-
-  // Draw player rectangle
-  final Paint paint = Paint()..color = _getColorFromString(color);
-  final rect = Rect.fromLTWH(screenPos.dx, screenPos.dy, playerWidth * scale, playerHeight * scale);
-  // canvas.drawRect(rect, paint);
-
-  
-
-  // Draw direction arrow
-  final String arrowPath = _getImageFromRace(color, hasFlag);
-  
-
-  if (appData.imagesCache.containsKey(arrowPath)) {
-    final ui.Image arrowsImage = appData.imagesCache[arrowPath]!;
-    final Offset tilePos = _getDirectionTile(direction, hasFlag, tickCounter);
-
-    
-
-    const Size tileSize = Size(64, 64); // Arrow tiles are 64x64
-    final Size scaledSize = Size((rect.width), (rect.height));
-
-    
-
-    drawSpriteFromSheet(
-      canvas,
-      arrowsImage,
-      Rect.fromLTWH(tilePos.dx, tilePos.dy, tileSize.width, tileSize.height),
-      screenPos,
-      scaledSize,
+          final int tickCounter = appData.gameState["tickCounter"] ?? 0;
+    // Get player position
+    final Offset screenPos = worldToScreen(
+      player["x"].toDouble(),
+      player["y"].toDouble(),
+      painterSize,
     );
+    // Draw player rectangle
+    final Paint paint = Paint()..color = _getColorFromString(color);
+    final rect = Rect.fromLTWH(screenPos.dx, screenPos.dy, playerWidth * scale, playerHeight * scale);
+    // canvas.drawRect(rect, paint);
+    // Draw direction arrow
+    final String arrowPath = _getImageFromRace(color, hasFlag);
+    if (appData.imagesCache.containsKey(arrowPath)) {
+      final ui.Image arrowsImage = appData.imagesCache[arrowPath]!;
+      final Offset tilePos = _getDirectionTile(direction, hasFlag, tickCounter);
+      const Size tileSize = Size(64, 64); // Arrow tiles are 64x64
+      final Size scaledSize = Size((rect.width), (rect.height));
+      drawSpriteFromSheet(
+        canvas,
+        arrowsImage,
+        Rect.fromLTWH(tilePos.dx, tilePos.dy, tileSize.width, tileSize.height),
+        screenPos,
+        scaledSize,
+      );
+    } else {
 
-    
-  } else {
-    
-  }
-
+    }
     // Draw key on top of player if they own it
     if (hasFlag) {
       // Buscar sprite de llave
@@ -499,7 +469,10 @@ class CanvasPainter extends CustomPainter {
       const double frameWidth = 16.0;
       const double frameHeight = 32.0;
       const int totalFrames = 6;
-      final int currentFrame = tickCounter % totalFrames;
+      
+      final int frameDuration = 4; // Aumenta este valor para que sea más lento
+      final int currentFrame = (tickCounter ~/ frameDuration) % totalFrames;
+
       final double srcX = currentFrame * frameWidth;
 
       // Escala pequeña de la llave
@@ -515,8 +488,6 @@ class CanvasPainter extends CustomPainter {
         playerCenterX - keyWidth / 2,
         screenPos.dy - keyHeight,
       );
-
-
       canvas.drawImageRect(
         spriteImg,
         Rect.fromLTWH(srcX, 0, frameWidth, frameHeight),
@@ -529,5 +500,47 @@ class CanvasPainter extends CustomPainter {
         Paint(),
       );
     }
+
+      // Dibujar nickname encima del personaje
+      final String nickname = player["nickname"] ?? "Player"; // Asegúrate de que tu jugador tenga esta clave
+      final TextSpan span = TextSpan(
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 10.0 * scale,
+          fontWeight: FontWeight.bold,
+        ),
+        text: nickname,
+      );
+
+      final TextPainter tp = TextPainter(
+        text: span,
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      )..layout();
+
+      final double textWidth = tp.width;
+      final double textHeight = tp.height;  
+      final double barPadding = 4.0;
+      final double barWidth = textWidth + barPadding * 2;
+      final double barHeight = textHeight + barPadding * 2;
+
+      // Posicionar la barra justo encima del personaje
+      final double barX = screenPos.dx + (playerWidth * scale - barWidth) / 2;
+      final double barY = screenPos.dy - (barHeight * 0.8); // 4 píxeles de margen extra
+
+      final Rect nameTagRect = Rect.fromLTWH(barX, barY, barWidth, barHeight);
+      final Paint nameTagPaint = Paint()
+        ..color = Colors.grey.withOpacity(0.6)
+        ..style = PaintingStyle.fill;
+
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(nameTagRect, Radius.circular(6)),
+        nameTagPaint,
+      );
+
+      // Dibujar el texto encima
+      tp.paint(canvas, Offset(barX + barPadding, barY + barPadding));
+
+
   }
 }

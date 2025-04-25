@@ -26,19 +26,34 @@ class _LayoutState extends State<Layout> {
     // Preload image
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await appData.getImage("key.png");
+
       await appData.getImage("Orc_Walk_full.png");
       await appData.getImage("Orc_Run_full.png");
+      await appData.getImage("Orc_Walk_Hurt_full.png");
+      await appData.getImage("Orc_Run_Hurt_full.png");
+      await appData.getImage("Orc_Attack_full.png");
+      await appData.getImage("Orc_Death_full.png");
 
       await appData.getImage("Sword_Walk_full.png");
       await appData.getImage("Sword_Run_full.png");
-      await appData.getImage("Sword_attack_full.png");
+      await appData.getImage("Sword_Walk_Hurt_full.png");
+      await appData.getImage("Sword_Run_Hurt_full.png");
+      await appData.getImage("Sword_Attack_full.png");
       await appData.getImage("Sword_Death_full.png");
-      await appData.getImage("Sword_Hurt_full.png");
 
       await appData.getImage("Slime_Walk_full.png");
       await appData.getImage("Slime_Run_full.png");
+      await appData.getImage("Slime_Walk_Hurt_full.png");
+      await appData.getImage("Slime_Run_Hurt_full.png");
+      await appData.getImage("Slime_Attack_full.png");
+      await appData.getImage("Slime_Death_full.png");
+
       await appData.getImage("Vampires_Walk_full.png");
       await appData.getImage("Vampires_Run_full.png");
+      await appData.getImage("Vampires_Walk_Hurt_full.png");
+      await appData.getImage("Vampires_Run_Hurt_full.png");
+      await appData.getImage("Vampires_Attack_full.png");
+      await appData.getImage("Vampires_Death_full.png");
     });
 
     // Escuchar cambios en gameOver
