@@ -92,7 +92,8 @@ class CanvasPainter extends CustomPainter {
   // Helper method to get camera and scale
   Map<String, dynamic> _getCameraAndScale(Size painterSize) {
     final cam = appData.camera;
-    final double scale = painterSize.width / cam.focal;
+    final double baseScale = painterSize.width / cam.focal;
+    final double scale = baseScale * 1.3; // Escala aumentada un 30%
     return {'cam': cam, 'scale': scale};
   }
 
@@ -124,8 +125,8 @@ class CanvasPainter extends CustomPainter {
       spriteSheet,
       srcRect,
       Rect.fromLTWH(
-        destPos.dx - destSize.width / 2,
-        destPos.dy - destSize.height / 2,
+        destPos.dx,
+        destPos.dy,
         destSize.width,
         destSize.height,
       ),
@@ -455,7 +456,7 @@ class CanvasPainter extends CustomPainter {
     
 
     const Size tileSize = Size(64, 64); // Arrow tiles are 64x64
-    final Size scaledSize = Size((rect.width * 3), (rect.height * 3));
+    final Size scaledSize = Size((rect.width), (rect.height));
 
     
 
