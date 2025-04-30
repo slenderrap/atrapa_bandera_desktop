@@ -412,8 +412,6 @@ class CanvasPainter extends CustomPainter {
             } else{
               hasFlag = false;
             }
-            print("HasFlag: ");
-            print(hasFlag);
           }
           final int tickCounter = appData.gameState["tickCounter"] ?? 0;
     // Get player position
