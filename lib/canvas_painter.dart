@@ -18,6 +18,31 @@ class CanvasPainter extends CustomPainter {
     "left": [Offset(0, 128), Offset(64, 128), Offset(128, 128), Offset(192, 128), Offset(256, 128), Offset(320, 128)],
     "right": [Offset(0, 192), Offset(64, 192), Offset(128, 192), Offset(192, 192), Offset(256, 192), Offset(320, 192)]
   };
+
+  Map<String, List<Offset>> orc_sword_attack = {
+    "down": [Offset(0, 0), Offset(64, 0), Offset(128, 0), Offset(192, 0), Offset(256, 0), Offset(320, 0), Offset(384, 0), Offset(448, 0)],
+    "up": [Offset(0, 64), Offset(64, 64), Offset(128, 64), Offset(192, 64), Offset(256, 64), Offset(320, 64), Offset(384, 64), Offset(448, 64)],
+    "left": [Offset(0, 128), Offset(64, 128), Offset(128, 128), Offset(192, 128), Offset(256, 128), Offset(320, 128), Offset(384, 128), Offset(448, 128)],
+    "right": [Offset(0, 192), Offset(64, 192), Offset(128, 192), Offset(192, 192), Offset(256, 192), Offset(320, 192), Offset(384, 192), Offset(448, 192)],
+    "none": [Offset(0, 0), Offset(64, 0), Offset(128, 0), Offset(192, 0), Offset(256, 0), Offset(320, 0), Offset(384, 0), Offset(448, 0)]
+  };
+
+  Map<String, List<Offset>> slime_attack = {
+    "down": [Offset(0, 0), Offset(64, 0), Offset(128, 0), Offset(192, 0), Offset(256, 0), Offset(320, 0), Offset(384, 0), Offset(448, 0), Offset(512, 0)],
+    "up": [Offset(0, 64), Offset(64, 64), Offset(128, 64), Offset(192, 64), Offset(256, 64), Offset(320, 64), Offset(384, 64), Offset(448, 64), Offset(512, 64)],
+    "left": [Offset(0, 128), Offset(64, 128), Offset(128, 128), Offset(192, 128), Offset(256, 128), Offset(320, 128), Offset(384, 128), Offset(448, 128), Offset(512, 128)],
+    "right": [Offset(0, 192), Offset(64, 192), Offset(128, 192), Offset(192, 192), Offset(256, 192), Offset(320, 192), Offset(384, 192), Offset(448, 192), Offset(512, 192)],
+    "none": [Offset(0, 0), Offset(64, 0), Offset(128, 0), Offset(192, 0), Offset(256, 0), Offset(320, 0), Offset(384, 0), Offset(448, 0), Offset(512, 0)]
+  };
+
+  Map<String, List<Offset>> vampire_attack = {
+    "down": [Offset(0, 0), Offset(64, 0), Offset(128, 0), Offset(192, 0), Offset(256, 0), Offset(320, 0), Offset(384, 0), Offset(448, 0), Offset(512, 0), Offset(576, 0), Offset(640, 0), Offset(704, 0)],
+    "up": [Offset(0, 64), Offset(64, 64), Offset(128, 64), Offset(192, 64), Offset(256, 64), Offset(320, 64), Offset(384, 64), Offset(448, 64), Offset(512, 64), Offset(576, 64), Offset(640, 64), Offset(704, 64)],
+    "left": [Offset(0, 128), Offset(64, 128), Offset(128, 128), Offset(192, 128), Offset(256, 128), Offset(320, 128), Offset(384, 128), Offset(448, 128), Offset(512, 128), Offset(576, 128), Offset(640, 128), Offset(704, 128)],
+    "right": [Offset(0, 192), Offset(64, 192), Offset(128, 192), Offset(192, 192), Offset(256, 192), Offset(320, 192), Offset(384, 192), Offset(448, 192), Offset(512, 192), Offset(576, 192), Offset(640, 192), Offset(704, 192)],
+    "none": [Offset(0, 0), Offset(64, 0), Offset(128, 0), Offset(192, 0), Offset(256, 0), Offset(320, 0), Offset(384, 0), Offset(448, 0), Offset(512, 0), Offset(576, 0), Offset(640, 0), Offset(704, 0)]
+  };
+
   CanvasPainter(this.appData);
 
   @override
@@ -398,6 +423,52 @@ class CanvasPainter extends CustomPainter {
     }
   }
 
+  static String _getAttackImageFromRace(String race) {
+    print("ENTRO EN LA SELECCION");
+    switch (race.toLowerCase()) {
+      case "orc":
+          return "Orc_Attack_full.png";
+      case "slime":
+          return "Slime_Attack_full.png";
+      case "vampire":
+          return "Vampires_Attack_full.png";
+      case "human":
+      default:
+          return "Sword_Attack_full.png";
+    }
+  }
+
+  String changeDirections(String direction){
+
+    if (direction.contains("up")) {
+      direction = "up";
+    } else if (direction.contains("down")) {
+      direction = "down";
+    }
+    return direction;
+  }
+
+  int calculateTickDifference(int tickCounter, int attackStartTick, int cycleTicks, Map<String, dynamic> player) {
+  int tick = (tickCounter - attackStartTick + cycleTicks) % cycleTicks;
+
+  // Lista de ticks que quieres comprobar
+  List<int> listTicks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
+
+  // Convertir ambas listas a sets
+  Set<int> attackTicksSet = Set.from(player["attackTicksUsed"]);
+  Set<int> listTicksSet = Set.from(listTicks);
+
+  // Verificar si todos los elementos de listTicks están en attackTicksUsed
+  bool hasAllTicks = listTicksSet.difference(attackTicksSet).isEmpty;
+
+  if (hasAllTicks) {
+    return 0;
+  }
+
+  return tick;
+}
+
+
   void drawPlayer(Canvas canvas, Size painterSize, Map<String, dynamic> player, List<dynamic> keys) {
     final camData = _getCameraAndScale(painterSize);
     final scale = camData['scale'];
@@ -427,20 +498,94 @@ class CanvasPainter extends CustomPainter {
     // Draw direction arrow
     final String arrowPath = _getImageFromRace(color, hasFlag);
     if (appData.imagesCache.containsKey(arrowPath)) {
-      final ui.Image arrowsImage = appData.imagesCache[arrowPath]!;
-      final Offset tilePos = _getDirectionTile(direction, hasFlag, tickCounter);
-      const Size tileSize = Size(64, 64); // Arrow tiles are 64x64
-      final Size scaledSize = Size((rect.width), (rect.height));
+  final ui.Image arrowsImage = appData.imagesCache[arrowPath]!;
+  final Offset tilePos = _getDirectionTile(direction, hasFlag, tickCounter);
+  const Size tileSize = Size(64, 64); // Arrow tiles are 64x64
+  final Size scaledSize = Size((rect.width), (rect.height));
+
+  Map<String, List<Offset>> attackAnimation;
+  switch (color) {
+    case "orc":
+      attackAnimation = orc_sword_attack;
+      break;
+    case "slime":
+      attackAnimation = slime_attack;
+      break;
+    case "vampire":
+      attackAnimation = vampire_attack;
+      break;
+    default:
+      attackAnimation = orc_sword_attack; // fallback
+  }
+
+  // Variable para controlar si la animación de ataque ya terminó
+  bool hasAttackAnimationFinished = false;
+
+  const int serverTickCycle = 25; // El ciclo del servidor tiene 25 ticks
+  final int attackStartTick = player["attackStartTick"] ?? 0;
+  int ticksTotales = calculateTickDifference(tickCounter, attackStartTick, serverTickCycle, player);
+
+  if (player["attacking"] == true && (ticksTotales != 0 )) {
+    // print("Ticks Totales: ");
+    // print(ticksTotales);
+    // print("Ticks usados: ");
+    // print(player["attackTicksUsed"]);
+    const int attackDurationTicks = 35; // La animación dura 35 ticks
+
+    // Calcular la proporción entre los 35 ticks de la animación y los 25 del ciclo
+    final int tickInCycle = (tickCounter - attackStartTick + serverTickCycle) % serverTickCycle;
+    final double normalizedTick = tickInCycle / serverTickCycle;
+    final int frameIndex = (normalizedTick * attackDurationTicks).toInt();
+
+    final List<Offset> frames = attackAnimation[changeDirections(direction)]!;
+    final int totalFrames = frames.length;
+
+    final int frameToDisplay = (frameIndex * totalFrames ~/ attackDurationTicks).clamp(0, totalFrames - 1);
+    final Offset frameOffset = frames[frameToDisplay];
+
+    final String spritePath = _getAttackImageFromRace(color);
+    if (appData.imagesCache.containsKey(spritePath)) {
+      final ui.Image attackSpriteSheet = appData.imagesCache[spritePath]!;
+
+      const Size tileSize = Size(64, 64);
+      final Size scaledSize = Size(playerWidth * scale, playerHeight * scale);
+
+      // Si llegamos al último frame de la animación, marcarla como terminada
+      if (frameToDisplay == totalFrames - 1) {
+        hasAttackAnimationFinished = true;
+      }
+
       drawSpriteFromSheet(
         canvas,
-        arrowsImage,
-        Rect.fromLTWH(tilePos.dx, tilePos.dy, tileSize.width, tileSize.height),
+        attackSpriteSheet,
+        Rect.fromLTWH(frameOffset.dx, frameOffset.dy, tileSize.width, tileSize.height),
         screenPos,
         scaledSize,
       );
-    } else {
-
     }
+
+  // // Imprimir el estado para depuración
+  // print("tickCounter: $tickCounter");
+  // print("attackStartTick: $attackStartTick");
+  // print("hasAttackAnimationFinished: $hasAttackAnimationFinished");
+  } else {
+    // Si no está atacando, dibuja el sprite normal de la flecha
+    drawSpriteFromSheet(
+      canvas,
+      arrowsImage,
+      Rect.fromLTWH(tilePos.dx, tilePos.dy, tileSize.width, tileSize.height),
+      screenPos,
+      scaledSize,
+    );
+  }
+
+  // Aquí verificamos si la animación terminó y si el jugador puede comenzar un nuevo ataque
+  if (hasAttackAnimationFinished) {
+    print("La animación de ataque terminó.");
+  }
+}
+
+
     // Draw key on top of player if they own it
     if (hasFlag) {
       // Buscar sprite de llave
@@ -538,7 +683,5 @@ class CanvasPainter extends CustomPainter {
 
       // Dibujar el texto encima
       tp.paint(canvas, Offset(barX + barPadding, barY + barPadding));
-
-
   }
 }
