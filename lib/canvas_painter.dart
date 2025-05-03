@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'app_data.dart';
@@ -424,7 +425,6 @@ class CanvasPainter extends CustomPainter {
   }
 
   static String _getAttackImageFromRace(String race) {
-    print("ENTRO EN LA SELECCION");
     switch (race.toLowerCase()) {
       case "orc":
           return "Orc_Attack_full.png";
@@ -472,123 +472,59 @@ class CanvasPainter extends CustomPainter {
   void drawPlayer(Canvas canvas, Size painterSize, Map<String, dynamic> player, List<dynamic> keys) {
     final camData = _getCameraAndScale(painterSize);
     final scale = camData['scale'];
-          final double playerWidth = (player["width"] as num).toDouble();
-          final double playerHeight = (player["height"] as num).toDouble(); // <-- ¿Quizás debería ser 'height'?
-          final String color = player["race"];
-          final String direction = player["direction"];
-          bool hasFlag = true;
-          for (var key in keys){
-            if(key["keyOwnerId"] == player["id"]){
-              hasFlag = true;
-            } else{
-              hasFlag = false;
-            }
-          }
-          final int tickCounter = appData.gameState["tickCounter"] ?? 0;
-    // Get player position
+    final double playerWidth = (player["width"] as num).toDouble();
+    final double playerHeight = (player["height"] as num).toDouble();
+    final String color = player["race"];
+    final String direction = player["direction"];
+    bool hasFlag = keys.any((key) => key["keyOwnerId"] == player["id"]);
+    final int tickCounter = appData.gameState["tickCounter"] ?? 0;
+
     final Offset screenPos = worldToScreen(
       player["x"].toDouble(),
       player["y"].toDouble(),
       painterSize,
     );
-    // Draw player rectangle
-    final Paint paint = Paint()..color = _getColorFromString(color);
-    final rect = Rect.fromLTWH(screenPos.dx, screenPos.dy, playerWidth * scale, playerHeight * scale);
-    // canvas.drawRect(rect, paint);
-    // Draw direction arrow
-    final String arrowPath = _getImageFromRace(color, hasFlag);
-    if (appData.imagesCache.containsKey(arrowPath)) {
-  final ui.Image arrowsImage = appData.imagesCache[arrowPath]!;
-  final Offset tilePos = _getDirectionTile(direction, hasFlag, tickCounter);
-  const Size tileSize = Size(64, 64); // Arrow tiles are 64x64
-  final Size scaledSize = Size((rect.width), (rect.height));
 
-  Map<String, List<Offset>> attackAnimation;
-  switch (color) {
-    case "orc":
-      attackAnimation = orc_sword_attack;
-      break;
-    case "slime":
-      attackAnimation = slime_attack;
-      break;
-    case "vampire":
-      attackAnimation = vampire_attack;
-      break;
-    default:
-      attackAnimation = orc_sword_attack; // fallback
-  }
-
-  // Variable para controlar si la animación de ataque ya terminó
-  bool hasAttackAnimationFinished = false;
-
-  const int serverTickCycle = 25; // El ciclo del servidor tiene 25 ticks
-  final int attackStartTick = player["attackStartTick"] ?? 0;
-  int ticksTotales = calculateTickDifference(tickCounter, attackStartTick, serverTickCycle, player);
-
-  if (player["attacking"] == true && (ticksTotales != 0 )) {
-    // print("Ticks Totales: ");
-    // print(ticksTotales);
-    // print("Ticks usados: ");
-    // print(player["attackTicksUsed"]);
-    const int attackDurationTicks = 35; // La animación dura 35 ticks
-
-    // Calcular la proporción entre los 35 ticks de la animación y los 25 del ciclo
-    final int tickInCycle = (tickCounter - attackStartTick + serverTickCycle) % serverTickCycle;
-    final double normalizedTick = tickInCycle / serverTickCycle;
-    final int frameIndex = (normalizedTick * attackDurationTicks).toInt();
-
-    final List<Offset> frames = attackAnimation[changeDirections(direction)]!;
-    final int totalFrames = frames.length;
-
-    final int frameToDisplay = (frameIndex * totalFrames ~/ attackDurationTicks).clamp(0, totalFrames - 1);
-    final Offset frameOffset = frames[frameToDisplay];
-
-    final String spritePath = _getAttackImageFromRace(color);
-    if (appData.imagesCache.containsKey(spritePath)) {
-      final ui.Image attackSpriteSheet = appData.imagesCache[spritePath]!;
-
-      const Size tileSize = Size(64, 64);
-      final Size scaledSize = Size(playerWidth * scale, playerHeight * scale);
-
-      // Si llegamos al último frame de la animación, marcarla como terminada
-      if (frameToDisplay == totalFrames - 1) {
-        hasAttackAnimationFinished = true;
-      }
-
-      drawSpriteFromSheet(
-        canvas,
-        attackSpriteSheet,
-        Rect.fromLTWH(frameOffset.dx, frameOffset.dy, tileSize.width, tileSize.height),
-        screenPos,
-        scaledSize,
-      );
-    }
-
-  // // Imprimir el estado para depuración
-  // print("tickCounter: $tickCounter");
-  // print("attackStartTick: $attackStartTick");
-  // print("hasAttackAnimationFinished: $hasAttackAnimationFinished");
-  } else {
-    // Si no está atacando, dibuja el sprite normal de la flecha
-    drawSpriteFromSheet(
-      canvas,
-      arrowsImage,
-      Rect.fromLTWH(tilePos.dx, tilePos.dy, tileSize.width, tileSize.height),
-      screenPos,
-      scaledSize,
+// Dibujar nickname encima del personaje
+    final String nickname = player["nickname"] ?? "Player";
+    final TextSpan span = TextSpan(
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 10.0 * scale,
+        fontWeight: FontWeight.bold,
+      ),
+      text: nickname,
     );
-  }
 
-  // Aquí verificamos si la animación terminó y si el jugador puede comenzar un nuevo ataque
-  if (hasAttackAnimationFinished) {
-    print("La animación de ataque terminó.");
-  }
-}
+    final TextPainter tp = TextPainter(
+      text: span,
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    )..layout();
 
+    final double textWidth = tp.width;
+    final double textHeight = tp.height;
+    final double barPadding = 4.0;
+    final double barWidth = textWidth + barPadding * 2;
+    final double barHeight = textHeight + barPadding * 2;
 
-    // Draw key on top of player if they own it
+    final double barX = screenPos.dx + (playerWidth * scale - barWidth) / 2;
+    final double barY = screenPos.dy - (barHeight * 0.8);
+
+    final Rect nameTagRect = Rect.fromLTWH(barX, barY, barWidth, barHeight);
+    final Paint nameTagPaint = Paint()
+      ..color = Colors.grey.withOpacity(0.6)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(nameTagRect, Radius.circular(6)),
+      nameTagPaint,
+    );
+
+    tp.paint(canvas, Offset(barX + barPadding, barY + barPadding));
+
+    // Dibujar la llave encima si la tiene
     if (hasFlag) {
-      // Buscar sprite de llave
       final level = appData.gameData["levels"].firstWhere(
         (lvl) => lvl["name"] == appData.gameState["level"],
         orElse: () => null,
@@ -606,82 +542,119 @@ class CanvasPainter extends CustomPainter {
       if (!appData.imagesCache.containsKey(spritePath)) return;
 
       final ui.Image spriteImg = appData.imagesCache[spritePath]!;
-      final int tickCounter = appData.gameState["tickCounter"] ?? 0;
-
-      // Parámetros de la animación
       const double frameWidth = 16.0;
       const double frameHeight = 32.0;
       const int totalFrames = 6;
-      
-      final int frameDuration = 4; // Aumenta este valor para que sea más lento
+      final int frameDuration = 4;
       final int currentFrame = (tickCounter ~/ frameDuration) % totalFrames;
-
       final double srcX = currentFrame * frameWidth;
-
-      // Escala pequeña de la llave
       final double keyScale = 1;
       final double keyWidth = frameWidth * scale * keyScale;
       final double keyHeight = frameHeight * scale * keyScale;
-
-      // Centro horizontal del jugador
       final double playerCenterX = screenPos.dx + (playerWidth * scale) / 2;
 
-      // Posicionar la llave justo encima y centrada
       final Offset keyPos = Offset(
         playerCenterX - keyWidth / 2,
         screenPos.dy - keyHeight,
       );
+
       canvas.drawImageRect(
         spriteImg,
         Rect.fromLTWH(srcX, 0, frameWidth, frameHeight),
-        Rect.fromLTWH(
-          keyPos.dx,
-          keyPos.dy,
-          keyWidth,
-          keyHeight,
-        ),
+        Rect.fromLTWH(keyPos.dx, keyPos.dy, keyWidth, keyHeight),
         Paint(),
       );
     }
 
-      // Dibujar nickname encima del personaje
-      final String nickname = player["nickname"] ?? "Player"; // Asegúrate de que tu jugador tenga esta clave
-      final TextSpan span = TextSpan(
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 10.0 * scale,
-          fontWeight: FontWeight.bold,
-        ),
-        text: nickname,
-      );
 
-      final TextPainter tp = TextPainter(
-        text: span,
-        textAlign: TextAlign.center,
-        textDirection: TextDirection.ltr,
-      )..layout();
+    final Rect rect = Rect.fromLTWH(screenPos.dx, screenPos.dy, playerWidth * scale, playerHeight * scale);
+    final String arrowPath = _getImageFromRace(color, hasFlag);
 
-      final double textWidth = tp.width;
-      final double textHeight = tp.height;  
-      final double barPadding = 4.0;
-      final double barWidth = textWidth + barPadding * 2;
-      final double barHeight = textHeight + barPadding * 2;
+    if (appData.imagesCache.containsKey(arrowPath)) {
+      final ui.Image arrowsImage = appData.imagesCache[arrowPath]!;
+      final Offset tilePos = _getDirectionTile(direction, hasFlag, tickCounter);
+      const Size tileSize = Size(64, 64);
+      final Size scaledSize = Size(rect.width, rect.height);
 
-      // Posicionar la barra justo encima del personaje
-      final double barX = screenPos.dx + (playerWidth * scale - barWidth) / 2;
-      final double barY = screenPos.dy - (barHeight * 0.8); // 4 píxeles de margen extra
+      Map<String, List<Offset>> attackAnimation;
+      switch (color) {
+        case "orc":
+          attackAnimation = orc_sword_attack;
+          break;
+        case "slime":
+          attackAnimation = slime_attack;
+          break;
+        case "vampire":
+          attackAnimation = vampire_attack;
+          break;
+        default:
+          attackAnimation = orc_sword_attack;
+      }
 
-      final Rect nameTagRect = Rect.fromLTWH(barX, barY, barWidth, barHeight);
-      final Paint nameTagPaint = Paint()
-        ..color = Colors.grey.withOpacity(0.6)
-        ..style = PaintingStyle.fill;
+      bool hasAttackAnimationFinished = false;
+      const int serverTickCycle = 25;
+      final int attackStartTick = player["attackStartTick"] ?? 0;
+      int ticksTotales = calculateTickDifference(tickCounter, attackStartTick, serverTickCycle, player);
 
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(nameTagRect, Radius.circular(6)),
-        nameTagPaint,
-      );
+      // Guardar capa si está dañado
+      bool isDamaged = player["isDamaged"] == true;
+      if (isDamaged) {
+        final Rect safeRect = Rect.fromLTWH(
+          screenPos.dx.clamp(0.0, painterSize.width),
+          screenPos.dy.clamp(0.0, painterSize.height),
+          (playerWidth * scale).clamp(0.0, painterSize.width),
+          (playerHeight * scale).clamp(0.0, painterSize.height),
+        );
+        canvas.saveLayer(safeRect, Paint());
+      }
 
-      // Dibujar el texto encima
-      tp.paint(canvas, Offset(barX + barPadding, barY + barPadding));
+      if (player["attacking"] == true && ticksTotales != 0) {
+        const int attackDurationTicks = 35;
+        final int tickInCycle = (tickCounter - attackStartTick + serverTickCycle) % serverTickCycle;
+        final double normalizedTick = tickInCycle / serverTickCycle;
+        final int frameIndex = (normalizedTick * attackDurationTicks).toInt();
+
+        final List<Offset> frames = attackAnimation[changeDirections(direction)]!;
+        final int totalFrames = frames.length;
+        final int frameToDisplay = (frameIndex * totalFrames ~/ attackDurationTicks).clamp(0, totalFrames - 1);
+        final Offset frameOffset = frames[frameToDisplay];
+
+        final String spritePath = _getAttackImageFromRace(color);
+        if (appData.imagesCache.containsKey(spritePath)) {
+          final ui.Image attackSpriteSheet = appData.imagesCache[spritePath]!;
+
+          if (frameToDisplay == totalFrames - 1) {
+            hasAttackAnimationFinished = true;
+          }
+
+          drawSpriteFromSheet(
+            canvas,
+            attackSpriteSheet,
+            Rect.fromLTWH(frameOffset.dx, frameOffset.dy, tileSize.width, tileSize.height),
+            screenPos,
+            scaledSize,
+          );
+        }
+      } else{
+        drawSpriteFromSheet(
+          canvas,
+          arrowsImage,
+          Rect.fromLTWH(tilePos.dx, tilePos.dy, tileSize.width, tileSize.height),
+          screenPos,
+          scaledSize,
+        );
+      }
+
+      // Pintar efecto de daño encima
+      if (isDamaged) {
+        final double damageOpacity = 0.2 + (0.4 * (sin(tickCounter * 0.3) + 1) / 2);
+        final Paint damagePaint = Paint()
+          ..color = Colors.red.withOpacity(damageOpacity)
+          ..blendMode = BlendMode.srcATop;
+
+        canvas.drawRect(rect, damagePaint);
+        canvas.restore(); // ✅ Restaurar siempre si abrimos capa
+      }
+    }
   }
 }

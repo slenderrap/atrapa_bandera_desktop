@@ -99,7 +99,7 @@ class AppData extends ChangeNotifier {
         // print(gameOver);
         notifyListeners();
       }
-      // print(data);
+      print(data);
     } catch (e) {
       if (kDebugMode) {
         print("Error processant missatge WebSocket: $e");
