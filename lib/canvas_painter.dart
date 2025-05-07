@@ -97,7 +97,7 @@ class CanvasPainter extends CustomPainter {
       // Draw players
       if (gameState["players"] != null) {
         for (var player in gameState["players"]) {
-          if(player["id"][0] == "C"){
+          if(player["id"][0] != "S"){
             // print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAV");
             // print(gameState["keys"]);
             // print("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
@@ -486,7 +486,14 @@ class CanvasPainter extends CustomPainter {
     );
 
 // Dibujar nickname encima del personaje
-    final String nickname = player["nickname"] ?? "Player";
+
+    String nickname = "Player";
+
+    print(player["nickname"]);
+
+    if (!player["nickname"].isEmpty){
+      nickname = player["nickname"];
+    }
     final TextSpan span = TextSpan(
       style: TextStyle(
         color: Colors.white,
